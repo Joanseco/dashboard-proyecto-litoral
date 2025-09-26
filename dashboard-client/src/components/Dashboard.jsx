@@ -3,10 +3,12 @@ import React, { useState } from 'react';
 // Importar componentes
 import Sidebar from './layout/Sidebar';
 import Header from './layout/Header';
+
 import AnalyticsSection from './sections/AnalyticsSection';
 import UsersSection from './sections/UsersSection';
 import SalesSection from './sections/SalesSection';
 import SettingsSection from './sections/SettingsSection';
+import ProductsSection from './sections/ProductsSection';
 
 const Dashboard = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -14,15 +16,18 @@ const Dashboard = () => {
     const [notifications, setNotifications] = useState(3);
     const [activeSection, setActiveSection] = useState('analytics'); // Estado principal de la navegación
 
+
     const getSectionTitle = () => {
         switch(activeSection) {
             case 'analytics': return 'Analytics Dashboard';
             case 'users': return 'Gestión de Usuarios';
+            case 'products': return 'Gestión de Productos';
             case 'sales': return 'Gestión de Ventas';
             case 'settings': return 'Configuración';
             default: return 'Dashboard';
         }
     };
+
 
     const renderActiveSection = () => {
         switch (activeSection) {
@@ -30,6 +35,8 @@ const Dashboard = () => {
                 return <AnalyticsSection />;
             case 'users':
                 return <UsersSection />;
+            case 'products':
+                return <ProductsSection />;
             case 'sales':
                 return <SalesSection />;
             case 'settings':

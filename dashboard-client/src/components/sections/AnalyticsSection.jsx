@@ -27,7 +27,7 @@ const AnalyticsSection = () => {
     orders: 1847,
   }); 
   const [chartData, setChartData] = useState([]); 
-  const [deviceData, setDeviceData] = useState([]); 
+  const [topProducts, setTopProducts] = useState([]); 
   const [activity, setActivity] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -35,20 +35,23 @@ const AnalyticsSection = () => {
   useEffect(() => {
     const loadAllData = async () => {
       try {
-        // Ejecuta las 3 llamadas que devuelven data variable y la actividad reciente
-        const [salesChart, pieChart, recentActivityData] = await Promise.all([
+        // Ejecuta las llamadas para los gráficos y actividad
+        const [salesChart, topProductsData, recentActivityData, statsData] = await Promise.all([
           fetchData('sales-data'), // Endpoint 1: Gráfico Ventas
-          fetchData('pie-data'),   // Endpoint 2: Gráfico Dispositivos
-          fetchData('activity'),  // Endpoint 3: Actividad Reciente
+          fetch(`${API_BASE_URL}/analytics/top-products`).then(r => r.json()), // Endpoint 2: Productos más vendidos
+          fetchData('activity'),   // Endpoint 3: Actividad Reciente
+          fetch(`${API_BASE_URL}/stats`).then(r => r.json()), // Endpoint 4: Stats reales
         ]);
 
-        // Nota: Asumimos que los datos de las Stats Cards (Endpoint 4)
-        // son más complejos. Por ahora, dejamos los valores hardcoded 
-        // o puedes hacer una llamada adicional si tienes un endpoint /api/stats
-
         setChartData(salesChart);
-        setDeviceData(pieChart);
+        setTopProducts(topProductsData);
         setActivity(recentActivityData);
+        setStats({
+          totalSales: statsData.totalSales || 0,
+          newUsers: statsData.totalUsers || 0,
+          orders: statsData.totalOrders || 0,
+          conversion: 0, // Puedes calcularlo si tienes la lógica
+        });
         setError(null);
       } catch (err) {
         console.error("Error al cargar la data de analytics:", err);
@@ -57,7 +60,6 @@ const AnalyticsSection = () => {
         setLoading(false);
       }
     };
-
     loadAllData();
   }, []);
 
@@ -79,24 +81,24 @@ const AnalyticsSection = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatsCard
           title="Usuarios Totales"
-          value={stats.newUsers.toLocaleString()} // Formateo de números
-          change={12.5} // Mantengo el cambio estático por ahora
+          value={stats.newUsers.toLocaleString()}
+          change={0}
           icon={Users}
           color="bg-blue-500"
         />
         <StatsCard
           title="Ventas Totales"
-          value={`$${stats.totalSales.toLocaleString()}`}
-          change={8.2}
+          value={`$${Number(stats.totalSales).toLocaleString()}`}
+          change={0}
           icon={DollarSign}
           color="bg-green-500"
         />
         <StatsCard
-          title="Conversión"
-          value={`${stats.conversion}%`}
-          change={-2.4}
-          icon={TrendingUp}
-          color="bg-purple-500"
+          title="Pedidos Completados"
+          value={stats.orders.toLocaleString()}
+          change={0}
+          icon={ShoppingCart}
+          color="bg-orange-500"
         />
         <StatsCard
           title="Pedidos"
@@ -127,25 +129,23 @@ const AnalyticsSection = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* Pie Chart */}
+        {/* Pie Chart - Productos más vendidos */}
         <div className="bg-white rounded-xl p-6 shadow-lg">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Dispositivos
+            Productos más vendidos
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
-              {/* !!! CAMBIO CRÍTICO: Usar deviceData en lugar de pieData !!! */}
               <Pie
-                data={deviceData} 
+                data={topProducts}
                 cx="50%"
                 cy="50%"
                 innerRadius={60}
                 outerRadius={120}
                 paddingAngle={5}
-                dataKey="value"
+                dataKey="ventas"
               >
-                {/* Usar deviceData.map y PIE_COLORS */}
-                {deviceData.map((entry, index) => (
+                {topProducts.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                 ))}
               </Pie>
@@ -153,8 +153,7 @@ const AnalyticsSection = () => {
             </PieChart>
           </ResponsiveContainer>
           <div className="flex flex-wrap justify-center gap-4 mt-4">
-            {/* !!! CAMBIO CRÍTICO: Usar deviceData para la leyenda !!! */}
-            {deviceData.map((item, index) => ( 
+            {topProducts.map((item, index) => (
               <div key={index} className="flex items-center">
                 <div
                   className="w-3 h-3 rounded-full mr-2"

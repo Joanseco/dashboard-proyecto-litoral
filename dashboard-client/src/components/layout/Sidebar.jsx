@@ -1,11 +1,12 @@
 
 import React from 'react';
-import { X, Users, BarChart2, DollarSign, Settings } from 'lucide-react';
+import { X, Users, BarChart2, DollarSign, Settings, ShoppingCart } from 'lucide-react';
 
 // Definir los ítems del menú
 const menuItems = [
   { id: 'analytics', label: 'Analytics', icon: BarChart2 },
   { id: 'users', label: 'Usuarios', icon: Users },
+  { id: 'products', label: 'Productos', icon: ShoppingCart },
   { id: 'sales', label: 'Ventas', icon: DollarSign },
   { id: 'settings', label: 'Configuración', icon: Settings },
 ];

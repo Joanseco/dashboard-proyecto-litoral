@@ -7,6 +7,7 @@ const SalesSection = () => {
     const [sales, setSales] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [search, setSearch] = useState("");
 
     // 2. Lógica de Fetch
     useEffect(() => {
@@ -56,38 +57,45 @@ const SalesSection = () => {
         return <div className="p-6 text-center text-gray-500">No se encontraron registros de ventas.</div>;
     }
 
+    // Filtrar ventas por nombre o email del cliente
+    const filteredSales = sales.filter(sale =>
+        sale.customer.toLowerCase().includes(search.toLowerCase()) ||
+        (sale.customer_email && sale.customer_email.toLowerCase().includes(search.toLowerCase()))
+    );
+
     // --- Renderizado Principal (Tabla) ---
 
     return (
         <section className="p-6 bg-white rounded-xl shadow-lg">
             <h2 className="text-2xl font-semibold mb-4 text-gray-800">Historial de Ventas</h2>
-            
+            {/* Filtro por nombre o email */}
+            <div className="mb-4">
+                <input
+                    type="text"
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    placeholder="Buscar por nombre o email..."
+                    className="border p-2 rounded w-full md:w-64"
+                />
+            </div>
             <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {sales.map((sale) => (
+                        {filteredSales.map((sale) => (
                             <tr key={sale.id}>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{sale.product}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{sale.customer}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{sale.customer_email}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">{`$${parseFloat(sale.amount).toFixed(2)}`}</td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                        sale.status === 'Completada' ? 'bg-green-100 text-green-800' :
-                                        sale.status === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' :
-                                        'bg-red-100 text-red-800'
-                                    }`}>
-                                        {sale.status}
-                                    </span>
-                                </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{sale.date}</td>
                             </tr>
                         ))}
