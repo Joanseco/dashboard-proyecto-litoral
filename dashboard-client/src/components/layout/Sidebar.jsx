@@ -1,6 +1,14 @@
+
 import React from 'react';
-import { X } from 'lucide-react';
-import { menuItems } from '../../data/dashboardData';
+import { X, Users, BarChart2, DollarSign, Settings } from 'lucide-react';
+
+// Definir los ítems del menú
+const menuItems = [
+  { id: 'analytics', label: 'Analytics', icon: BarChart2 },
+  { id: 'users', label: 'Usuarios', icon: Users },
+  { id: 'sales', label: 'Ventas', icon: DollarSign },
+  { id: 'settings', label: 'Configuración', icon: Settings },
+];
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen, activeSection, setActiveSection }) => {
   return (
