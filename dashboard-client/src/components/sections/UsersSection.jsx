@@ -83,10 +83,11 @@ const UsersSection = () => {
             const response = await fetch(`${API_BASE_URL}/users/${id}`, {
                 method: 'DELETE',
             });
-            if (!response.ok) throw new Error('Error al eliminar usuario');
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Error al eliminar usuario');
             fetchUsers();
         } catch (err) {
-            setError('No se pudo eliminar el usuario.');
+            setError(err.message);
         }
     };
 
@@ -167,9 +168,11 @@ const UsersSection = () => {
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                        user.status === 'Activo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                                        user.status.toLowerCase() === 'activo'
+                                          ? 'bg-green-100 text-green-800'
+                                          : 'bg-gray-100 text-gray-800'
                                     }`}>
-                                        {user.status}
+                                        {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.joined_date}</td>
