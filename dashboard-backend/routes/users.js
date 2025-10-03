@@ -2,6 +2,26 @@ const express = require('express');
 const router = express.Router();
 
 module.exports = (db) => {
+  // Crear usuario
+  router.post('/users', async (req, res) => {
+    const { name, email, password, role, status } = req.body;
+    if (!name || !email || !password || !role || !status) {
+      return res.status(400).json({ message: 'Faltan datos requeridos' });
+    }
+    try {
+      // Hash de contraseña (en producción usa bcrypt, aquí solo para ejemplo)
+      const password_hash = password; // Reemplaza por bcrypt.hashSync(password, 10) si tienes bcrypt
+      const joined_date = new Date().toISOString().slice(0, 10);
+      const query = 'INSERT INTO Users (name, email, password_hash, role, status, joined_date) VALUES (?, ?, ?, ?, ?, ?)';
+      await db.query(query, [name, email, password_hash, role, status, joined_date]);
+      res.status(201).json({ message: 'Usuario creado correctamente' });
+    } catch (error) {
+      if (error.code === 'ER_DUP_ENTRY') {
+        return res.status(400).json({ message: 'El email ya está registrado.' });
+      }
+      res.status(500).json({ message: 'Error al crear usuario' });
+    }
+  });
 
   // Obtener todos los usuarios (incluyendo status)
   router.get('/users', async (req, res) => {

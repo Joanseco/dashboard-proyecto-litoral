@@ -48,3 +48,9 @@ CREATE TABLE RecentActivity (
     activity_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES Users(id)
 );
+
+
+select * from users;
+Select * from products;
+select * from sales;
+select * from recentactivity;

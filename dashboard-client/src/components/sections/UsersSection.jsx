@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-// Si tenías los datos estáticos aquí, coméntalos o elimínalos.
-// import { users as staticUsers } from '../../data/dashboardData'; 
-
-const API_BASE_URL = 'http://localhost:5000/api'; // Definimos la base de la API
+const API_BASE_URL = 'http://localhost:5000/api';
 
 const UsersSection = () => {
     // Estados principales
@@ -15,6 +12,9 @@ const UsersSection = () => {
     const [editingUser, setEditingUser] = useState(null);
     const [editForm, setEditForm] = useState({ name: '', email: '', role: '', status: '' });
     const [saving, setSaving] = useState(false);
+    // Formulario de creación de usuario
+    const [createForm, setCreateForm] = useState({ name: '', email: '', password: '', role: 'Cliente', status: 'Activo' });
+    const [creating, setCreating] = useState(false);
 
     useEffect(() => {
         fetchUsers();
@@ -32,6 +32,31 @@ const UsersSection = () => {
             setError('No se pudieron cargar los datos de usuarios.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Handlers para el formulario de creación
+    const handleCreateChange = (e) => {
+        setCreateForm({ ...createForm, [e.target.name]: e.target.value });
+    };
+
+    const handleCreate = async (e) => {
+        e.preventDefault();
+        setCreating(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/users`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(createForm),
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Error al crear usuario');
+            setCreateForm({ name: '', email: '', password: '', role: 'Cliente', status: 'Activo' });
+            fetchUsers();
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setCreating(false);
         }
     };
 
@@ -119,6 +144,24 @@ const UsersSection = () => {
     return (
         <section className="p-6 bg-white rounded-xl shadow-lg">
             <h2 className="text-2xl font-semibold mb-4 text-gray-800">Gestión de Usuarios</h2>
+            {/* Formulario de creación de usuario */}
+            <form onSubmit={handleCreate} className="bg-white p-4 rounded-lg shadow flex flex-col md:flex-row gap-4 items-end mb-6">
+                <input name="name" value={createForm.name} onChange={handleCreateChange} placeholder="Nombre" required className="border p-2 rounded w-full md:w-1/4" />
+                <input name="email" value={createForm.email} onChange={handleCreateChange} placeholder="Email" required type="email" className="border p-2 rounded w-full md:w-1/4" />
+                <input name="password" value={createForm.password} onChange={handleCreateChange} placeholder="Contraseña" required type="password" className="border p-2 rounded w-full md:w-1/4" />
+                <select name="role" value={createForm.role} onChange={handleCreateChange} className="border p-2 rounded w-full md:w-1/6">
+                    <option value="Admin">Admin</option>
+                    <option value="Moderador">Moderador</option>
+                    <option value="Cliente">Cliente</option>
+                </select>
+                <select name="status" value={createForm.status} onChange={handleCreateChange} className="border p-2 rounded w-full md:w-1/6">
+                    <option value="Activo">Activo</option>
+                    <option value="Inactivo">Inactivo</option>
+                </select>
+                <button type="submit" disabled={creating} className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+                    {creating ? 'Creando...' : 'Crear Usuario'}
+                </button>
+            </form>
             {/* Filtro por rol y búsqueda */}
             <div className="mb-4 flex flex-col md:flex-row gap-2 md:items-center">
                 <div>
